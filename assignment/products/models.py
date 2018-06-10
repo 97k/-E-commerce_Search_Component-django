@@ -44,6 +44,9 @@ class ProductQuerySet(models.query.QuerySet):
                     )
         return self.filter(lookups).distinct()
 
+    def filter_price(self, low_price, high_price):
+        return self.filter(price__range=(low_price, high_price))
+
 class ProductManager(models.Manager):
     def get_queryset(self):
         return ProductQuerySet(self.model, using=self._db)

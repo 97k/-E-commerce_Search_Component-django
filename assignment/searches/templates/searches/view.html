@@ -2,14 +2,32 @@
 {% block content %}
   {% if request.GET.q %}
     <div class="col-12" py=4>
-      Results for <b>{{request.GET.q}}</b>
-      <hr>
-    </div>
-  {% else %}
-    <div class="col-12 col-md-6">
-      {% include "searches/snippets/search-form.html" %}
 
-    </div>
+      Results for <b>{{request.GET.q}}</b>
+
+
+        {# <input type="text" name="" class="form-control col-lg-6 mx-auto"  value="Filter by"> #}
+        <div class="container mr-auto"><br>
+          <p>Price</p>
+          <form method="get" action="{% url 'searches:price' %}">
+
+            <span>₹</span>
+            <input class="form-input col-3"type="text" maxlength="9" id="low_price" placeholder="Min" name="low_price"
+            class=" input-sm col-lg-2" aria-label="Min">
+
+            <span>₹</span>
+            <input class="form-input col-3"type="text" maxlength="9" id="high_price" placeholder="Max" name="high_price"
+            class="input-sm col-lg-2" aria-label="Max">
+            <input class="btn btn-primary" type="submit" name="" value="Go">
+          </form>
+
+            {% if request.GET.low_price %}Filtered Products! {% endif %}
+        </div>
+      </div>
+      <hr>
+
+  {% else %}
+
   {% endif %}
 
       <div class="row">
