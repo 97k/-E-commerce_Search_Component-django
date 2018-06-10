@@ -1,0 +1,28 @@
+{% url 'products:allproducts' as allprodcuts_url %}
+<!--request.path is enabled by default-->
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
+  <div class="container">
+  <a class="navbar-brand" href="{% url 'home' %}">{% if base_name %}{{base_name}} {% else %} Aditya eCommerce{% endif %}</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+
+      <li class="nav-item {% if request.path == allprodcuts_url %}active{% endif %}">
+        <a class="nav-link" href="{{allprodcuts_url}}">Products</a>
+      </li>
+
+    </ul>
+
+    {% include "searches/snippets/search-form.html" %}
+
+
+
+
+  </div>
+</div>
+</nav>
+      <!--{ include "search/snippets/search-form.html" }-->

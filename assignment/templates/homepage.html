@@ -1,0 +1,19 @@
+{%extends 'base.html'%}
+{% load bootstrap4 %}
+{% load static%}
+
+{% block base_head %}
+{% endblock %}
+
+
+{%block content%}
+<div class="text-center jumbotron">
+  <h1> {{title}}</h1>
+</div>
+
+  <div class="row">
+    <div class="col-sm-6">
+      <h1>{{ content|safe }}</h1>
+    </div>
+  </div>
+{%endblock%}
