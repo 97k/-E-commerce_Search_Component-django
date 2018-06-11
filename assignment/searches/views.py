@@ -33,7 +33,7 @@ class SearchProductListView(ListView):
                         context['android']='Android'
                         context['iOS'] = 'iOS'
         except:
-            raise Http404('Sorry! We do not have thsi product!')
+            raise Http404('Sorry! We do not have this product!')
         return context
 
 
@@ -41,8 +41,8 @@ class SearchProductListView(ListView):
          request = self.request
          query = request.GET.get('q', None) # request.GET is python dictionary.
          if query is not None:
-             # lookups = Q(title__icontains=query) | Q(description__icontains=query) # Implemented this in models(#ProductModelManager(custom))
-             return Product.objects.search(query) # distinct is used here to remove if we have looked up any product twice i.e one from title and one from description
+            #Implemented this in models ProductModelManager(custom))
+             return Product.objects.search(query)
          else:
              return Product.objects.none()
 
@@ -58,10 +58,14 @@ class Filter(ListView):
             low_price = request.GET.get('low_price')
             max_price = request.GET.get('high_price')
 
+            if 'Android' in request.GET:
+                _query = 'android'
+            if 'iOS' in request.GET:
+                _query = 'iOS'
+
             if low_price =='':
                 low_price=0
             if max_price=='':
-                # max_price = Tag.objects.get(Q(title__icontains=_query)).products.aggregate(Max('price'))
                 if len(_query.split())>1:
                     q = _query.split()
 
@@ -87,8 +91,8 @@ class Filter(ListView):
                     max_price = max_price.products.aggregate(Max('price'))
                     print(max_price)
                     #
-                    # if  len(max_price) != 1:
-                    #     max_price=Product.objects.search(_query).aggregate(Max('price'))
+                    if  len(max_price) != 1:
+                        max_price=Product.objects.search(_query).aggregate(Max('price'))
 
                     max_price = max_price.get('price__max')
                     print(max_price)

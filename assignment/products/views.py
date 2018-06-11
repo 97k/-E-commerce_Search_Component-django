@@ -17,5 +17,5 @@ class ProductListView(ListView):
 
     def get_queryset(self, *args, **kwargs):
         request = self.request
-        items = sorted(Product.objects.all(), key=lambda x: random.random())
-        return  items #Then we can get rid of the queryset call at the beginning of this class which is now commented.
+        items = sorted(Product.objects.all(), key=lambda x: random.random()) # This lets item arrange in a random order.
+        return  items

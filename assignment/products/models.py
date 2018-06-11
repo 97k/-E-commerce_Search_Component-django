@@ -43,13 +43,12 @@ class ProductQuerySet(models.query.QuerySet):
                     Q(tag__slug__icontains=query)
                     )
 
-        # print('type of lookup is ', type(lookups))
-        # print('return type is ', self.filter(lookups).distinct())
         return self.filter(lookups).distinct()
 
     def filter_price(self, low_price, high_price):
         return self.filter(price__range=(low_price, high_price))
 
+# Custom Model Manager.
 class ProductManager(models.Manager):
     def get_queryset(self):
         return ProductQuerySet(self.model, using=self._db)
@@ -77,14 +76,13 @@ class Product(models.Model):
     title = models.CharField(max_length=120)
     slug = models.SlugField(blank=True, unique=True)
     description = models.TextField()
-    # I've added a default value as per the suggestions given by django.(39.99)
     price = models.DecimalField(decimal_places=2, max_digits=20, default=39.99)
     image = models.ImageField(upload_to=upload_image_path, null=True, blank=True)
     feature = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-
+    # For handling detail view of selected product by the user.
     # def get_absolute_url(self):
     #     # return '/products/{slug}'.format(slug=self.slug) The best way is to use reverseself.
     #     return reverse('products:detail', kwargs={'slug': self.slug, })
