@@ -1,15 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
-  {% if request.GET.q %}
+  {% if request.GET.q or request.GET.Android or request.GET.iOS %}
     <div class="col-12" py=4>
+        Results for <b>{{request.GET.q}}</b> <br> <br>
+      {% if content %}
+      <div class="col-xs-6">
 
-      Results for <b>{{request.GET.q}}</b>
+        <div class="container text-left">
+          <h6>Refine</h6>
+          <p>Mobile Phone Operating System</p>
+          <form action="{% url 'searches:refine' %}" method="get">
+            <label class="checkbox">
+              <input type="checkbox" id="{{android}}" name="{{android}}"value="1">{{android}}
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="{{iOS}}" name="{{iOS}}"value="2">{{iOS}}
+            </label>
+            <br>
+            <input type="submit" class="btn btn-primary btn-sm btn-outline-dark"name="" value="Refine!">
+          </form>
+        </div
+    </div>
+{%endif%}
+
 
 
         {# <input type="text" name="" class="form-control col-lg-6 mx-auto"  value="Filter by"> #}
         <div class="container mr-auto"><br>
-          <p>Price</p>
-          <form method="get" action="{% url 'searches:price' %}">
+          <p>Price Range</p>
+          <form method="get" action="{% url 'searches:refine' %}">
 
             <span>₹</span>
             <input class="form-input col-3"type="text" maxlength="9" id="low_price" placeholder="Min" name="low_price"
@@ -22,7 +41,7 @@
             <input class="btn btn-primary" type="submit" name="" value="Go">
           </form>
 
-            {% if request.GET.low_price %}Filtered Products! {% endif %}
+
         </div>
       </div>
       <hr>
@@ -30,6 +49,9 @@
   {% else %}
 
   {% endif %}
+    {% if request.GET.low_price %}<p class="mb-3"> <em>Filtered Products!</em> </p> {% endif %}
+
+
 
       <div class="row">
         {% for object in object_list %}

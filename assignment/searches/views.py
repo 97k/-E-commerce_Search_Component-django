@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views.generic import ListView
 from products.models import Product, Category
 from tags.models import Tag
+from django.shortcuts import Http404
 from django.db.models import Avg, Max, Min, Q
 
 # Create your views here.
@@ -10,12 +11,32 @@ _query = ''
 class SearchProductListView(ListView):
     template_name = 'searches/view.html'
 
-    # def get_context_data(self, *args, **kwargs):
-    #     context = super(SearchProductListView, self).get_context_data(*args, **kwargs)
-    #     query = self.request.GET.get('q')
-    #     context['query'] = query
-    #     # By this we can do more stuff like #SearchQuery.Objects.create(query=query)
-    #     return context
+    def get_context_data(self, *args, **kwargs):
+        context = super(SearchProductListView, self).get_context_data(*args, **kwargs)
+        request = self.request
+        content = request.GET.get('q')
+        try:
+            if len(content.split())>1:
+                content = content.split()
+                for value in content:
+                    obj = Category.objects.filter(Q(title__icontains=value)|Q(description__icontains=value))
+                    if obj.first().title=='Mobile':
+                        context['content']='mobile'
+                        context['android']='Android'
+                        context['iOS'] = 'iOS'
+                        break
+            else:
+
+                    obj = Category.objects.filter(Q(title__icontains=content)|Q(description__icontains=content))
+                    if obj.first().title=='Mobile':
+                        context['content'] = 'mobile'
+                        context['android']='Android'
+                        context['iOS'] = 'iOS'
+        except:
+            raise Http404('Sorry! We do not have thsi product!')
+        return context
+
+
     def get_queryset(self, *args, **kwargs):
          request = self.request
          query = request.GET.get('q', None) # request.GET is python dictionary.
@@ -25,31 +46,13 @@ class SearchProductListView(ListView):
          else:
              return Product.objects.none()
 
-    # class priceFilter(low_price=0, high_price=0):
-    #
-    #     if low_price<high_price:
-    #         lp = Q(price__lte=high_price)
-    #         hp = Q(price__gte=low_price)
-    #         return Product.objects.search(_query).filter(lp & hp)
 
-
-class PriceFilter(ListView):
+class Filter(ListView):
     template_name = 'searches/view.html'
 
     def get_queryset(self, *args, **kwargs):
         request = self.request
         _query = request.GET.get('prev')
-        print('changed to ', _query)
-        # lp = request.GET.get('low-price', None) # request.GET is python dictionary.
-        # hp = request.GET.get('high-price', None)
-        # print('low_price: ', lp, 'high_price', hp)
-        # if lp<hp:
-        #     low_price = Q(price__lte=high_price)
-        #     high_price = Q(price__gte=low_price)
-        #     print('this is what we found', low_price, high_price)
-        #     return Product.objects.search(_query).filter(lp & hp)
-        # else:
-        #     return Product.objects.none()
 
         if 'low_price' in request.GET:
             low_price = request.GET.get('low_price')
@@ -61,13 +64,12 @@ class PriceFilter(ListView):
                 # max_price = Tag.objects.get(Q(title__icontains=_query)).products.aggregate(Max('price'))
                 if len(_query.split())>1:
                     q = _query.split()
-                    print(q)
 
                     for value in q:
                         print(value)
                         print('looking in ', _query)
-                        max_price = Category.objects.filter(Q(title__icontains=_query)|Q(description__icontains=_query))
-                        max_price = max_price.first()
+                        obj = Category.objects.filter(Q(title__icontains=_query)|Q(description__icontains=_query))
+                        max_price = obj.first()
                         print(max_price)
                         max_price = max_price.products.aggregate(Max('price'))
                         print(max_price)
@@ -75,12 +77,12 @@ class PriceFilter(ListView):
 
                         if max_price is not None:
                             print('filter price 2 is found and is ', max_price)
-                            return
+                            break
 
                 else:
                     print('looking in ', _query)
-                    max_price = Category.objects.filter(Q(title__icontains=_query)|Q(description__icontains=_query))
-                    max_price = max_price.first()
+                    obj = Category.objects.filter(Q(title__icontains=_query)|Q(description__icontains=_query))
+                    max_price = obj.first()
                     print(max_price)
                     max_price = max_price.products.aggregate(Max('price'))
                     print(max_price)
@@ -94,3 +96,8 @@ class PriceFilter(ListView):
             my_products=Product.objects.search(_query).filter_price(low_price=low_price, high_price=max_price)
             print('My products after applying filter are', my_products)
             return my_products
+
+        if 'Android' in request.GET:
+            return Product.objects.search('android')
+        elif 'iOS' in request.GET:
+            return Product.objects.search('iOS')
