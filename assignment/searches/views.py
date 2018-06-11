@@ -15,25 +15,26 @@ class SearchProductListView(ListView):
         context = super(SearchProductListView, self).get_context_data(*args, **kwargs)
         request = self.request
         content = request.GET.get('q')
-        try:
-            if len(content.split())>1:
-                content = content.split()
-                for value in content:
-                    obj = Category.objects.filter(Q(title__icontains=value)|Q(description__icontains=value))
+
+        if len(content.split())>1:
+            content = content.split()
+            for value in content:
+                obj = Category.objects.filter(Q(title__icontains=value)|Q(description__icontains=value))
+                if obj.first():
                     if obj.first().title=='Mobile':
                         context['content']='mobile'
                         context['android']='Android'
                         context['iOS'] = 'iOS'
                         break
-            else:
 
-                    obj = Category.objects.filter(Q(title__icontains=content)|Q(description__icontains=content))
+        else:
+                obj = Category.objects.filter(Q(title__icontains=content)|Q(description__icontains=content))
+                if obj.first():
                     if obj.first().title=='Mobile':
                         context['content'] = 'mobile'
                         context['android']='Android'
                         context['iOS'] = 'iOS'
-        except:
-            raise Http404('Sorry! We do not have this product!')
+
         return context
 
 
