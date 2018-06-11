@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.views.generic import ListView
-from products.models import Product
-from django.db.models import Avg, Max, Min
+from products.models import Product, Category
+from tags.models import Tag
+from django.db.models import Avg, Max, Min, Q
 
 # Create your views here.
 
@@ -18,9 +19,6 @@ class SearchProductListView(ListView):
     def get_queryset(self, *args, **kwargs):
          request = self.request
          query = request.GET.get('q', None) # request.GET is python dictionary.
-         _query = query
-         print('_query is set to ', _query)
-         print(query)
          if query is not None:
              # lookups = Q(title__icontains=query) | Q(description__icontains=query) # Implemented this in models(#ProductModelManager(custom))
              return Product.objects.search(query) # distinct is used here to remove if we have looked up any product twice i.e one from title and one from description
@@ -40,6 +38,8 @@ class PriceFilter(ListView):
 
     def get_queryset(self, *args, **kwargs):
         request = self.request
+        _query = request.GET.get('prev')
+        print('changed to ', _query)
         # lp = request.GET.get('low-price', None) # request.GET is python dictionary.
         # hp = request.GET.get('high-price', None)
         # print('low_price: ', lp, 'high_price', hp)
@@ -52,13 +52,45 @@ class PriceFilter(ListView):
         #     return Product.objects.none()
 
         if 'low_price' in request.GET:
-            filter_price1 = request.GET.get('low_price')
-            filter_price2 = request.GET.get('high_price')
-            if filter_price1 =='':
-                filter_price1=0
-            if filter_price2=='':
-                filter_price2=Product.objects.search(_query).aggregate(Max('price'))
-                filter_price2 = filter_price2.get('price__max')
-            my_products=Product.objects.search(_query).filter_price(low_price=filter_price1, high_price=filter_price2)
+            low_price = request.GET.get('low_price')
+            max_price = request.GET.get('high_price')
+
+            if low_price =='':
+                low_price=0
+            if max_price=='':
+                # max_price = Tag.objects.get(Q(title__icontains=_query)).products.aggregate(Max('price'))
+                if len(_query.split())>1:
+                    q = _query.split()
+                    print(q)
+
+                    for value in q:
+                        print(value)
+                        print('looking in ', _query)
+                        max_price = Category.objects.filter(Q(title__icontains=_query)|Q(description__icontains=_query))
+                        max_price = max_price.first()
+                        print(max_price)
+                        max_price = max_price.products.aggregate(Max('price'))
+                        print(max_price)
+
+
+                        if max_price is not None:
+                            print('filter price 2 is found and is ', max_price)
+                            return
+
+                else:
+                    print('looking in ', _query)
+                    max_price = Category.objects.filter(Q(title__icontains=_query)|Q(description__icontains=_query))
+                    max_price = max_price.first()
+                    print(max_price)
+                    max_price = max_price.products.aggregate(Max('price'))
+                    print(max_price)
+                    #
+                    # if  len(max_price) != 1:
+                    #     max_price=Product.objects.search(_query).aggregate(Max('price'))
+
+                    max_price = max_price.get('price__max')
+                    print(max_price)
+
+            my_products=Product.objects.search(_query).filter_price(low_price=low_price, high_price=max_price)
             print('My products after applying filter are', my_products)
             return my_products

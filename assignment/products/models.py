@@ -28,7 +28,6 @@ def upload_image_path(instance, filename):
 
 
 
-
 class ProductQuerySet(models.query.QuerySet):
     def active(self):
         return self.filter(active=True)
@@ -37,11 +36,15 @@ class ProductQuerySet(models.query.QuerySet):
         return self.filter(feature=True, active=True)
 
     def search(self, query):
+
         lookups = (Q(title__icontains=query)|
                     Q(description__icontains=query)|
                     Q(tag__title__icontains=query)|
                     Q(tag__slug__icontains=query)
                     )
+
+        # print('type of lookup is ', type(lookups))
+        # print('return type is ', self.filter(lookups).distinct())
         return self.filter(lookups).distinct()
 
     def filter_price(self, low_price, high_price):
@@ -96,3 +99,13 @@ def product_pre_save(sender, instance, *args, **kwargs):
         instance.slug = unique_slug_generator(instance)
 
 pre_save.connect(product_pre_save, sender=Product)
+
+
+class Category(models.Model):
+    title = models.CharField(max_length=120)
+    description = models.TextField(blank=True, null=True)
+    products = models.ManyToManyField(Product, blank=True)
+
+
+    def __str__(self):
+        return self.title
